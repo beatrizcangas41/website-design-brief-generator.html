@@ -378,6 +378,7 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
 .file-remove:hover{background:#fef2f2}
 .file-item input[type="text"]{padding:.45rem .6rem;font-size:.8rem}
 .attach-options{margin-top:.6rem}
+.step-chip.locked{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -798,8 +799,13 @@ ${deliverablesFormatted}
  const meta=document.createElement('div');meta.className='step-meta';meta.setAttribute('aria-live','polite');
  const track=document.createElement('div');track.className='progress-track';track.innerHTML='<div class="progress-fill"></div>';
  const steps=[];let current=0;
+ const urlInput=document.getElementById('websiteUrl');
+ function urlReady(){return urlInput.value.trim()!==''&&urlInput.checkValidity()}
+ function blockToStep1(){show(0);urlInput.focus();urlInput.reportValidity()}
+ function syncLock(){const ok=urlReady();[...nav.children].forEach((chip,n)=>{if(n>0){chip.classList.toggle('locked',!ok);chip.setAttribute('aria-disabled',String(!ok));chip.title=ok?'':'Enter a valid Website URL first'}})}
+ urlInput.addEventListener('input',syncLock);
  definitions.forEach((def,i)=>{
-  const chip=document.createElement('button');chip.type='button';chip.className='step-chip';chip.textContent=(i+1)+'. '+def.title;chip.addEventListener('click',()=>show(i));nav.append(chip);
+  const chip=document.createElement('button');chip.type='button';chip.className='step-chip';chip.textContent=(i+1)+'. '+def.title;chip.addEventListener('click',()=>{if(i>0&&!urlReady()){blockToStep1();return}show(i)});nav.append(chip);
   const section=document.createElement('section');section.className='step';section.setAttribute('aria-label',def.title);
   section.innerHTML='<h2 class="step-heading">'+def.title+'</h2><p class="step-intro">'+def.desc+'</p>';
   def.indexes.forEach(index=>section.append(groups[index]));
@@ -807,15 +813,16 @@ ${deliverablesFormatted}
   const footer=document.createElement('div');footer.className='step-footer';
   if(i>0){const back=document.createElement('button');back.type='button';back.className='btn btn-secondary';back.textContent='← Back';back.addEventListener('click',()=>show(i-1));footer.append(back)}
   const next=document.createElement('button');next.type='button';next.className='btn btn-primary';next.textContent=i===3?'Generate prompt':'Continue →';next.addEventListener('click',()=>{
-   if(i===0){const url=document.getElementById('websiteUrl');if(!url.reportValidity())return}
+   if(!urlReady()){blockToStep1();return}
    if(i===3){form.requestSubmit();document.getElementById('promptOutput').scrollIntoView({behavior:'smooth',block:'nearest'})}else show(i+1)
   });footer.append(next);section.append(footer);steps.push(section)
  });
  const originalActions=form.querySelector('.button-group');originalActions.style.marginTop='1rem';originalActions.querySelector('[type="submit"]').style.display='none';
  form.insertBefore(track,form.firstChild);form.insertBefore(meta,track);form.insertBefore(nav,meta);steps.forEach(step=>form.insertBefore(step,originalActions));
  function show(i){current=i;steps.forEach((step,n)=>{step.classList.toggle('active',n===i);step.hidden=n!==i});[...nav.children].forEach((chip,n)=>{chip.classList.toggle('active',n===i);chip.setAttribute('aria-current',n===i?'step':'false')});meta.textContent='Step '+(i+1)+' of '+steps.length;track.firstElementChild.style.width=((i+1)/steps.length*100)+'%'}
- const oldReset=window.resetForm;window.resetForm=function(){oldReset();show(0)};
- show(0);
+ const oldReset=window.resetForm;window.resetForm=function(){oldReset();show(0);syncLock()};
+ form.addEventListener('submit',e=>{if(!urlReady()){e.preventDefault();e.stopImmediatePropagation();blockToStep1()}},true);
+ show(0);syncLock();
 })();
 </script>
 </body>
