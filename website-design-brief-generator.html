@@ -359,6 +359,25 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
 .group-actions{display:flex;gap:.5rem;margin:.4rem 0 .8rem}.mini-btn{border:0;background:transparent;text-decoration:underline;cursor:pointer;color:#52525b;font-size:.8rem}
 @media(max-width:1023px){.output-panel{position:static;max-height:none}}@media(max-width:600px){.checkbox-grid{grid-template-columns:1fr}.output-header{flex-direction:column}.output-actions{width:100%}.output-actions .btn{flex:1}.step-chip{font-size:.72rem}.panel{padding:1rem}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+
+/* Attachments */
+.dropzone{border:1.5px dashed #c9c9d2;border-radius:var(--radius-md);padding:1.25rem 1rem;text-align:center;background:var(--bg-surface);cursor:pointer;transition:background-color .15s ease,border-color .15s ease}
+.dropzone:hover,.dropzone.dragover{background:var(--bg-subtle);border-color:#777782}
+.dropzone:focus-within{outline:3px solid #9a9aa5;outline-offset:2px}
+.dropzone strong{display:block;font-size:.875rem}
+.dropzone span{display:block;font-size:.78rem;color:var(--text-muted);margin-top:.2rem}
+.dropzone input[type="file"]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.file-list{list-style:none;margin-top:.75rem;display:grid;gap:.5rem}
+.file-item{border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:.6rem .7rem;background:var(--bg-surface);display:grid;gap:.45rem}
+.file-row{display:flex;align-items:center;gap:.6rem;min-width:0}
+.file-name{font-size:.84rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+.file-meta{font-size:.74rem;color:var(--text-muted);white-space:nowrap}
+.file-badge{font:500 .68rem var(--font-mono);padding:.1rem .4rem;border-radius:4px;background:var(--bg-subtle);color:var(--text-muted);white-space:nowrap}
+.file-badge.embedded{background:#ecfdf3;color:#067647}
+.file-remove{border:0;background:transparent;color:#dc2626;font-size:1.1rem;line-height:1;cursor:pointer;padding:.1rem .3rem;border-radius:4px}
+.file-remove:hover{background:#fef2f2}
+.file-item input[type="text"]{padding:.45rem .6rem;font-size:.8rem}
+.attach-options{margin-top:.6rem}
 </style>
 </head>
 <body>
@@ -484,6 +503,20 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
             <textarea id="additionalContext" placeholder="Target audience, conversion targets, tech stack restrictions (e.g. WordPress, Webflow, React)..."></textarea>
           </div>
 
+          <!-- Context Attachments -->
+          <div class="form-group">
+            <label for="attachmentInput">Context Attachments
+              <span class="label-hint">Brand guidelines, briefs, analytics exports, screenshots, copy docs. Text files (.txt, .md, .csv, .json, .html, .css, .xml) are embedded in the prompt; other files (PDF, images, Office, design files) are referenced by name — upload them with the prompt.</span>
+            </label>
+            <label class="dropzone" id="dropzone">
+              <input type="file" id="attachmentInput" multiple>
+              <strong>Drop files here or click to browse</strong>
+              <span>Up to 20 files · text files over 150 KB are referenced, not embedded</span>
+            </label>
+            <ul class="file-list" id="fileList" aria-live="polite"></ul>
+            <label class="checkbox-label attach-options"><input type="checkbox" id="embedText" checked> Embed text-file contents directly in the prompt</label>
+          </div>
+
           <!-- Buttons -->
           <div class="button-group">
             <button type="submit" class="btn btn-primary">Generate Prompt</button>
@@ -512,6 +545,91 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
   <div id="toast" class="toast">Prompt copied to clipboard!</div>
 
   <script>
+    /* ---------- Context attachments ---------- */
+    const TEXT_EXT = ['txt','md','markdown','csv','tsv','json','html','htm','css','xml','yml','yaml','svg'];
+    const MAX_EMBED_BYTES = 150 * 1024;
+    const MAX_FILES = 20;
+    let attachments = []; // {id, name, ext, type, size, text|null, note}
+
+    function fileExt(name) { const i = name.lastIndexOf('.'); return i > -1 ? name.slice(i + 1).toLowerCase() : ''; }
+    function formatSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+    function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function isTextFile(f) { return TEXT_EXT.includes(fileExt(f.name)) || (f.type || '').startsWith('text/'); }
+
+    async function addFiles(fileList) {
+      const incoming = Array.from(fileList);
+      for (const f of incoming) {
+        if (attachments.length >= MAX_FILES) { showToast(`Limit is ${MAX_FILES} files.`); break; }
+        if (attachments.some(a => a.name === f.name && a.size === f.size)) continue;
+        let text = null;
+        if (isTextFile(f) && f.size <= MAX_EMBED_BYTES) {
+          try { text = await f.text(); } catch (e) { text = null; }
+        }
+        attachments.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()), name: f.name, ext: fileExt(f.name), type: f.type || 'unknown', size: f.size, text, note: '' });
+      }
+      renderFileList();
+    }
+
+    function removeAttachment(id) { attachments = attachments.filter(a => a.id !== id); renderFileList(); }
+
+    function renderFileList() {
+      const list = document.getElementById('fileList');
+      list.innerHTML = attachments.map(a => `
+        <li class="file-item" data-id="${a.id}">
+          <div class="file-row">
+            <span class="file-name" title="${escapeHtml(a.name)}">${escapeHtml(a.name)}</span>
+            <span class="file-badge ${a.text !== null ? 'embedded' : ''}">${a.text !== null ? 'EMBED' : 'REFERENCE'}</span>
+            <span class="file-meta">${formatSize(a.size)}</span>
+            <button type="button" class="file-remove" aria-label="Remove ${escapeHtml(a.name)}" data-remove="${a.id}">×</button>
+          </div>
+          <input type="text" placeholder="What is this file? (e.g. 2025 brand guidelines — source of truth for colors)" value="${escapeHtml(a.note)}" data-note="${a.id}">
+        </li>`).join('');
+    }
+
+    function fenceFor(text) {
+      const runs = text.match(/`+/g) || [];
+      const longest = runs.reduce((m, r) => Math.max(m, r.length), 0);
+      return '`'.repeat(Math.max(3, longest + 1));
+    }
+
+    function buildAttachmentSection() {
+      if (attachments.length === 0) return '';
+      const embedOn = document.getElementById('embedText').checked;
+      const embedded = embedOn ? attachments.filter(a => a.text !== null) : [];
+      const referenced = attachments.filter(a => !embedded.includes(a));
+
+      let out = `\n---\n\n## **Attached Context Materials**\nThe client supplied ${attachments.length} file(s) as additional context. Use them as primary evidence alongside the live website.\n`;
+      out += `\n| # | File | Type | Size | Delivery | Description |\n|---|---|---|---|---|---|\n`;
+      attachments.forEach((a, i) => {
+        const how = embedded.includes(a) ? 'Embedded below' : 'Uploaded with prompt';
+        const note = (a.note || '—').replace(/\|/g, '\\|');
+        out += `| ${i + 1} | ${a.name.replace(/\|/g, '\\|')} | ${a.ext ? '.' + a.ext : a.type} | ${formatSize(a.size)} | ${how} | ${note} |\n`;
+      });
+
+      if (referenced.length > 0) {
+        out += `\n**Files to review from this conversation's uploads:** ${referenced.map(a => a.name).join(', ')}. Extract brand rules, visual tokens, copy, data points, and constraints from each.\n`;
+      }
+
+      embedded.forEach(a => {
+        const lang = ['htm'].includes(a.ext) ? 'html' : (a.ext === 'markdown' ? 'md' : a.ext);
+        const fence = fenceFor(a.text);
+        out += `\n### Attachment: ${a.name}${a.note ? ' — ' + a.note : ''}\n${fence}${lang}\n${a.text.trim()}\n${fence}\n`;
+      });
+      return out + '\n';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const input = document.getElementById('attachmentInput');
+      const zone = document.getElementById('dropzone');
+      const list = document.getElementById('fileList');
+      input.addEventListener('change', e => { addFiles(e.target.files); input.value = ''; });
+      ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('dragover'); }));
+      ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('dragover'); }));
+      zone.addEventListener('drop', e => { if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+      list.addEventListener('click', e => { const id = e.target.dataset.remove; if (id) removeAttachment(id); });
+      list.addEventListener('input', e => { const id = e.target.dataset.note; if (!id) return; const a = attachments.find(x => x.id === id); if (a) a.note = e.target.value; });
+    });
+
     function generatePrompt() {
       const websiteUrl = document.getElementById('websiteUrl').value.trim();
       if (!websiteUrl) {
@@ -525,7 +643,8 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
       const creativeApproach = document.querySelector('input[name="creativeApproach"]:checked').value;
 
       const sources = Array.from(document.querySelectorAll('.sourceMaterial:checked')).map(el => el.value);
-      const sourcesText = sources.length > 0 ? sources.join(', ') : 'Publicly accessible website content';
+      let sourcesText = sources.length > 0 ? sources.join(', ') : 'Publicly accessible website content';
+      if (attachments.length > 0) sourcesText += ` + ${attachments.length} attached file(s) (see Attached Context Materials)`;
 
       const deliverables = Array.from(document.querySelectorAll('.deliverable:checked')).map(el => el.value);
       const competitors = document.getElementById('competitors').value.trim() || 'N/A';
@@ -533,6 +652,11 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
       const additionalContext = document.getElementById('additionalContext').value.trim() || 'Focus on user experience, clear typography, and conversion-focused design.';
 
       const deliverablesFormatted = deliverables.map(d => `  - ${d}`).join('\n');
+
+      const attachSection = buildAttachmentSection();
+      const attachPhaseStep = attachments.length > 0
+        ? `\n4. Review every item under **Attached Context Materials** before drawing conclusions. Treat attachments as client-supplied evidence: cite them by file name, cross-check them against the live site, and flag any conflict (e.g., guideline colors vs. live colors) as a finding. Do not assume a referenced file was received — if a listed file is missing from this conversation, say so and mark dependent findings **UNKNOWN**.`
+        : '';
 
       const promptText = `# Universal Master AI Prompt — Website Audit to Strategic Design Brief
 
@@ -569,7 +693,7 @@ ${elementsToPreserve}
 
 ## **Business Context & Constraints**
 ${additionalContext}
-
+${attachSection}
 ---
 
 ## **Execution Instructions & Analysis Phases**
@@ -577,7 +701,7 @@ ${additionalContext}
 ### **Phase 1 — Discovery & Evidence Collection**
 1. Crawl and inspect the main navigation, homepage, key detail pages, utility footers, forms, and responsive mobile layouts for **${websiteUrl}**.
 2. Record concrete visual and functional evidence for each finding.
-3. Classify all observations as **VERIFIED** (directly observed), **INFERRED** (interpretation requiring confirmation), or **UNKNOWN**.
+3. Classify all observations as **VERIFIED** (directly observed), **INFERRED** (interpretation requiring confirmation), or **UNKNOWN**.${attachPhaseStep}
 
 ### **Phase 2 — Reverse-Engineer Brand & Visual Identity**
 1. **Brand Identity:** Determine brand purpose, core offering, audience hypothesis, tone of voice, and messaging hierarchy.
@@ -609,7 +733,9 @@ ${deliverablesFormatted}
 - Deliver an actionable implementation roadmap with prioritized task backlogs (P0 Critical, P1 Important, P2 Enhancement).`;
 
       document.getElementById('promptOutput').textContent = promptText;
-      showToast('Prompt generated successfully!');
+      const embedOn = document.getElementById('embedText').checked;
+      const toUpload = attachments.filter(a => !(embedOn && a.text !== null)).length;
+      showToast(toUpload > 0 ? `Prompt generated — upload ${toUpload} referenced file(s) with it.` : 'Prompt generated successfully!');
     }
 
     function copyPrompt() {
@@ -642,6 +768,8 @@ ${deliverablesFormatted}
 
     function resetForm() {
       document.getElementById('generatorForm').reset();
+      attachments = [];
+      renderFileList();
       document.getElementById('promptOutput').innerHTML = '<div class="placeholder-text">Fill in the project parameters and click "Generate Prompt" to build your custom AI kickoff prompt.</div>';
       showToast('Form reset.');
     }
@@ -664,7 +792,7 @@ ${deliverablesFormatted}
   {title:'Project basics',desc:'Start with the website and what you want to accomplish.',indexes:[0,1,2]},
   {title:'Research & direction',desc:'Choose how deeply to investigate and how boldly to evolve the design.',indexes:[3,4,5]},
   {title:'Deliverables',desc:'Select what the final design brief should include.',indexes:[6]},
-  {title:'Context & constraints',desc:'Add inspiration, things to preserve, and useful background.',indexes:[7,8,9]}
+  {title:'Context & constraints',desc:'Add inspiration, things to preserve, useful background, and any files that give the AI more context.',indexes:[7,8,9,10]}
  ];
  const nav=document.createElement('nav');nav.className='step-nav';nav.setAttribute('aria-label','Form steps');
  const meta=document.createElement('div');meta.className='step-meta';meta.setAttribute('aria-live','polite');
