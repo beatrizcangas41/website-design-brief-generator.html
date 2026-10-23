@@ -1,0 +1,655 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2870
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fmodern\fcharset0 Courier;}
+{\colortbl;\red255\green255\blue255;\red24\green24\blue24;\red236\green241\blue247;}
+{\*\expandedcolortbl;;\cssrgb\c12157\c12157\c12157;\cssrgb\c94118\c95686\c97647;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs18 \cf2 \cb3 \expnd0\expndtw0\kerning0
+\outl0\strokewidth0 \strokec2 <!DOCTYPE html>\
+<html lang="en">\
+<head>\
+  <meta charset="UTF-8">\
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">\
+  <title>Website \uc0\u8594  Design Brief Generator</title>\
+\
+  <!-- Typography -->\
+  <link rel="preconnect" href="https://fonts.googleapis.com">\
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">\
+\
+  <style>\
+    :root \{\
+      --bg-main: #f9f9fb;\
+      --bg-surface: #ffffff;\
+      --bg-subtle: #f1f1f5;\
+      --border-color: #e2e2e8;\
+      --border-focus: #18181b;\
+      --text-main: #18181b;\
+      --text-muted: #646470;\
+      --text-light: #8e8e9c;\
+      --accent-primary: #18181b;\
+      --accent-hover: #27272a;\
+      --accent-active: #09090b;\
+      --radius-sm: 6px;\
+      --radius-md: 10px;\
+      --radius-lg: 14px;\
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);\
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);\
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;\
+      --font-serif: 'Newsreader', Georgia, serif;\
+      --font-mono: 'JetBrains Mono', monospace;\
+    \}\
+\
+    * \{\
+      box-sizing: border-box;\
+      margin: 0;\
+      padding: 0;\
+    \}\
+\
+    body \{\
+      background-color: var(--bg-main);\
+      color: var(--text-main);\
+      font-family: var(--font-sans);\
+      line-height: 1.5;\
+      -webkit-font-smoothing: antialiased;\
+      padding: 2rem 1rem;\
+    \}\
+\
+    .container \{\
+      max-width: 1280px;\
+      margin: 0 auto;\
+    \}\
+\
+    /* Header */\
+    header \{\
+      margin-bottom: 2.5rem;\
+      border-bottom: 1px solid var(--border-color);\
+      padding-bottom: 1.5rem;\
+    \}\
+\
+    .brand-eyebrow \{\
+      font-size: 0.8125rem;\
+      font-weight: 600;\
+      text-transform: uppercase;\
+      letter-spacing: 0.08em;\
+      color: var(--text-muted);\
+      margin-bottom: 0.25rem;\
+    \}\
+\
+    h1 \{\
+      font-family: var(--font-serif);\
+      font-size: 2.25rem;\
+      font-weight: 500;\
+      letter-spacing: -0.02em;\
+      color: var(--text-main);\
+    \}\
+\
+    header p \{\
+      color: var(--text-muted);\
+      font-size: 0.95rem;\
+      margin-top: 0.5rem;\
+      max-width: 720px;\
+    \}\
+\
+    /* Layout */\
+    .app-grid \{\
+      display: grid;\
+      grid-template-columns: 1fr;\
+      gap: 2rem;\
+    \}\
+\
+    @media (min-width: 1024px) \{\
+      .app-grid \{\
+        grid-template-columns: 520px 1fr;\
+        align-items: start;\
+      \}\
+    \}\
+\
+    /* Card Panels */\
+    .panel \{\
+      background: var(--bg-surface);\
+      border: 1px solid var(--border-color);\
+      border-radius: var(--radius-lg);\
+      padding: 1.75rem;\
+      box-shadow: var(--shadow-sm);\
+    \}\
+\
+    .panel-title \{\
+      font-size: 1.125rem;\
+      font-weight: 600;\
+      margin-bottom: 1.25rem;\
+      padding-bottom: 0.75rem;\
+      border-bottom: 1px solid var(--border-color);\
+      display: flex;\
+      align-items: center;\
+      justify-content: space-between;\
+    \}\
+\
+    /* Form Fields */\
+    .form-group \{\
+      margin-bottom: 1.25rem;\
+    \}\
+\
+    .form-group:last-child \{\
+      margin-bottom: 0;\
+    \}\
+\
+    label \{\
+      display: block;\
+      font-size: 0.84rem;\
+      font-weight: 600;\
+      color: var(--text-main);\
+      margin-bottom: 0.375rem;\
+    \}\
+\
+    label .required \{\
+      color: #e11d48;\
+      margin-left: 2px;\
+    \}\
+\
+    .label-hint \{\
+      display: block;\
+      font-weight: 400;\
+      font-size: 0.78rem;\
+      color: var(--text-muted);\
+      margin-top: 0.125rem;\
+      margin-bottom: 0.375rem;\
+    \}\
+\
+    input[type="text"],\
+    input[type="url"],\
+    select,\
+    textarea \{\
+      width: 100%;\
+      padding: 0.625rem 0.75rem;\
+      font-family: var(--font-sans);\
+      font-size: 0.875rem;\
+      color: var(--text-main);\
+      background-color: var(--bg-surface);\
+      border: 1px solid var(--border-color);\
+      border-radius: var(--radius-sm);\
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;\
+    \}\
+\
+    input[type="text"]:focus,\
+    input[type="url"]:focus,\
+    select:focus,\
+    textarea:focus \{\
+      outline: none;\
+      border-color: var(--border-focus);\
+      box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.08);\
+    \}\
+\
+    textarea \{\
+      resize: vertical;\
+      min-height: 80px;\
+    \}\
+\
+    /* Checkbox & Radio Grids */\
+    .checkbox-grid,\
+    .radio-group \{\
+      display: grid;\
+      grid-template-columns: 1fr;\
+      gap: 0.5rem;\
+      margin-top: 0.375rem;\
+    \}\
+\
+    @media (min-width: 640px) \{\
+      .checkbox-grid \{\
+        grid-template-columns: repeat(2, 1fr);\
+      \}\
+    \}\
+\
+    .checkbox-label,\
+    .radio-label \{\
+      display: flex;\
+      align-items: flex-start;\
+      gap: 0.5rem;\
+      font-size: 0.8125rem;\
+      font-weight: 400;\
+      color: var(--text-main);\
+      cursor: pointer;\
+      padding: 0.5rem 0.625rem;\
+      border: 1px solid var(--border-color);\
+      border-radius: var(--radius-sm);\
+      background: var(--bg-surface);\
+      transition: background-color 0.15s ease;\
+    \}\
+\
+    .checkbox-label:hover,\
+    .radio-label:hover \{\
+      background: var(--bg-subtle);\
+    \}\
+\
+    .checkbox-label input,\
+    .radio-label input \{\
+      margin-top: 0.125rem;\
+      accent-color: var(--accent-primary);\
+    \}\
+\
+    /* Action Toolbar */\
+    .button-group \{\
+      display: flex;\
+      flex-wrap: wrap;\
+      gap: 0.75rem;\
+      margin-top: 1.5rem;\
+      padding-top: 1.25rem;\
+      border-top: 1px solid var(--border-color);\
+    \}\
+\
+    .btn \{\
+      display: inline-flex;\
+      align-items: center;\
+      justify-content: center;\
+      gap: 0.5rem;\
+      padding: 0.625rem 1.125rem;\
+      font-family: var(--font-sans);\
+      font-size: 0.875rem;\
+      font-weight: 500;\
+      border-radius: var(--radius-sm);\
+      cursor: pointer;\
+      transition: all 0.15s ease;\
+      border: 1px solid transparent;\
+      text-decoration: none;\
+    \}\
+\
+    .btn-primary \{\
+      background-color: var(--accent-primary);\
+      color: #ffffff;\
+    \}\
+\
+    .btn-primary:hover \{\
+      background-color: var(--accent-hover);\
+    \}\
+\
+    .btn-secondary \{\
+      background-color: var(--bg-surface);\
+      border-color: var(--border-color);\
+      color: var(--text-main);\
+    \}\
+\
+    .btn-secondary:hover \{\
+      background-color: var(--bg-subtle);\
+    \}\
+\
+    .btn-outline-danger \{\
+      background-color: transparent;\
+      color: #dc2626;\
+      border-color: var(--border-color);\
+      margin-left: auto;\
+    \}\
+\
+    .btn-outline-danger:hover \{\
+      background-color: #fef2f2;\
+      border-color: #fca5a5;\
+    \}\
+\
+    /* Output Section */\
+    .output-panel \{\
+      display: flex;\
+      flex-direction: column;\
+      height: 100%;\
+      min-height: 600px;\
+    \}\
+\
+    .output-header \{\
+      display: flex;\
+      align-items: center;\
+      justify-content: space-between;\
+      gap: 1rem;\
+      margin-bottom: 1rem;\
+    \}\
+\
+    .output-actions \{\
+      display: flex;\
+      gap: 0.5rem;\
+    \}\
+\
+    .prompt-container \{\
+      flex: 1;\
+      background: var(--bg-subtle);\
+      border: 1px solid var(--border-color);\
+      border-radius: var(--radius-md);\
+      padding: 1.25rem;\
+      font-family: var(--font-mono);\
+      font-size: 0.8125rem;\
+      line-height: 1.6;\
+      color: var(--text-main);\
+      white-space: pre-wrap;\
+      word-wrap: break-word;\
+      overflow-y: auto;\
+      max-height: 750px;\
+    \}\
+\
+    .placeholder-text \{\
+      color: var(--text-light);\
+      font-family: var(--font-sans);\
+      font-style: italic;\
+      text-align: center;\
+      padding: 4rem 1rem;\
+    \}\
+\
+    /* Notification Toast */\
+    .toast \{\
+      position: fixed;\
+      bottom: 1.5rem;\
+      right: 1.5rem;\
+      background: var(--accent-primary);\
+      color: #ffffff;\
+      padding: 0.75rem 1.25rem;\
+      border-radius: var(--radius-sm);\
+      font-size: 0.875rem;\
+      font-weight: 500;\
+      box-shadow: var(--shadow-md);\
+      opacity: 0;\
+      transform: translateY(10px);\
+      transition: opacity 0.2s ease, transform 0.2s ease;\
+      pointer-events: none;\
+      z-index: 1000;\
+    \}\
+\
+    .toast.show \{\
+      opacity: 1;\
+      transform: translateY(0);\
+    \}\
+  </style>\
+</head>\
+<body>\
+\
+  <div class="container">\
+    <header>\
+      <div class="brand-eyebrow">Interactive Web Artifact</div>\
+      <h1>Website \uc0\u8594  Design Brief Generator</h1>\
+      <p>Configure project inputs to generate a comprehensive, evidence-based AI kickoff prompt for auditing websites, extracting brand systems, and drafting strategic design briefs.</p>\
+    </header>\
+\
+    <div class="app-grid">\
+      <!-- INPUT FORM PANEL -->\
+      <section class="panel">\
+        <div class="panel-title">Project Parameters</div>\
+\
+        <form id="generatorForm" onsubmit="event.preventDefault(); generatePrompt();">\
+          <!-- Required Website URL -->\
+          <div class="form-group">\
+            <label for="websiteUrl">Website URL <span class="required">*</span></label>\
+            <input type="url" id="websiteUrl" placeholder="https://example.com" required>\
+          </div>\
+\
+          <!-- Brand Name -->\
+          <div class="form-group">\
+            <label for="brandName">Brand Name <span class="label-hint">(Optional \'97 auto-detected if left blank)</span></label>\
+            <input type="text" id="brandName" placeholder="e.g. Acme Corp">\
+          </div>\
+\
+          <!-- Primary Objective -->\
+          <div class="form-group">\
+            <label for="primaryObjective">Primary Objective</label>\
+            <select id="primaryObjective">\
+              <option value="Complete Website Redesign & Brand Blueprint">Complete Website Redesign & Brand Blueprint</option>\
+              <option value="UX/UI Polish & Interaction Enhancement">UX/UI Polish & Interaction Enhancement</option>\
+              <option value="Brand Identity Extraction & Design System Creation">Brand Identity Extraction & Design System Creation</option>\
+              <option value="Content, SEO & Conversion Optimization Audit">Content, SEO & Conversion Optimization Audit</option>\
+              <option value="Accessibility & Technical Modernization">Accessibility & Technical Modernization</option>\
+            </select>\
+          </div>\
+\
+          <!-- Research Depth -->\
+          <div class="form-group">\
+            <label>Research & Discovery Depth</label>\
+            <div class="radio-group">\
+              <label class="radio-label">\
+                <input type="radio" name="researchDepth" value="Standard Discovery" checked>\
+                <span><strong>Standard Discovery:</strong> Core templates, main navigation, UX & brand extraction</span>\
+              </label>\
+              <label class="radio-label">\
+                <input type="radio" name="researchDepth" value="Deep Reverse-Engineering">\
+                <span><strong>Deep Reverse-Engineering:</strong> Comprehensive template, component, content & technical audit</span>\
+              </label>\
+            </div>\
+          </div>\
+\
+          <!-- Creative Approach -->\
+          <div class="form-group">\
+            <label>Creative Evolution Approach</label>\
+            <div class="radio-group">\
+              <label class="radio-label">\
+                <input type="radio" name="creativeApproach" value="Refine & Preserve (Concept A Focus)" checked>\
+                <span><strong>Refine & Preserve:</strong> Focus on usability, rhythm & polish while retaining existing DNA</span>\
+              </label>\
+              <label class="radio-label">\
+                <input type="radio" name="creativeApproach" value="Evolve & Elevate (Concept B Focus)">\
+                <span><strong>Evolve & Elevate:</strong> Modernize design system, storytelling & interactive features</span>\
+              </label>\
+              <label class="radio-label">\
+                <input type="radio" name="creativeApproach" value="Strategic Transformation (Concept C Focus)">\
+                <span><strong>Strategic Transformation:</strong> Ambitious creative pivot grounded in user intent</span>\
+              </label>\
+            </div>\
+          </div>\
+\
+          <!-- Available Source Materials -->\
+          <div class="form-group">\
+            <label>Available Source Materials</label>\
+            <div class="checkbox-grid">\
+              <label class="checkbox-label"><input type="checkbox" class="sourceMaterial" value="Brand Guidelines / Deck"> Brand Guidelines</label>\
+              <label class="checkbox-label"><input type="checkbox" class="sourceMaterial" value="Design Files (Figma/Adobe)"> Design Files</label>\
+              <label class="checkbox-label"><input type="checkbox" class="sourceMaterial" value="Analytics & User Data"> Analytics Baseline</label>\
+              <label class="checkbox-label"><input type="checkbox" class="sourceMaterial" value="Social Media Profiles"> Social Profiles</label>\
+              <label class="checkbox-label"><input type="checkbox" class="sourceMaterial" value="Content Documents / Copy"> Content Files</label>\
+              <label class="checkbox-label"><input type="checkbox" class="sourceMaterial" value="Customer Feedback / Surveys"> Customer Feedback</label>\
+            </div>\
+          </div>\
+\
+          <!-- Selectable Deliverables -->\
+          <div class="form-group">\
+            <label>Required Design Brief Deliverables</label>\
+            <div class="checkbox-grid">\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Executive Brand Assessment" checked> Executive Assessment</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Brand Identity & Positioning Brief" checked> Brand & Positioning</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Visual Identity Tokens Specification" checked> Visual Tokens</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Recommended Art Direction & Moodboard" checked> Art Direction</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Complete Design System Tokens" checked> Design System</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Architecture & Page Briefs" checked> Sitemap & Page Briefs</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="UX & Interaction Specification" checked> UX & Interaction</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Content & Editorial Guidelines" checked> Editorial Guidelines</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="SEO & Digital Marketing Strategy" checked> SEO & Marketing</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Business & Monetization Model" checked> Business Model</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Technical Implementation Requirements" checked> Tech Requirements</label>\
+              <label class="checkbox-label"><input type="checkbox" class="deliverable" value="Prioritized Execution Roadmap" checked> Execution Backlog</label>\
+            </div>\
+          </div>\
+\
+          <!-- Competitors & Inspiration -->\
+          <div class="form-group">\
+            <label for="competitors">Competitors & Design Inspiration</label>\
+            <textarea id="competitors" placeholder="List benchmark sites or competitors to compare against..."></textarea>\
+          </div>\
+\
+          <!-- Elements to Preserve -->\
+          <div class="form-group">\
+            <label for="elementsToPreserve">Non-Negotiable Elements to Preserve</label>\
+            <textarea id="elementsToPreserve" placeholder="Specify existing logos, brand colors, key URLs, navigation labels, or feature patterns that must remain untouched..."></textarea>\
+          </div>\
+\
+          <!-- Additional Business Context -->\
+          <div class="form-group">\
+            <label for="additionalContext">Business Goals & Context</label>\
+            <textarea id="additionalContext" placeholder="Target audience, conversion targets, tech stack restrictions (e.g. WordPress, Webflow, React)..."></textarea>\
+          </div>\
+\
+          <!-- Buttons -->\
+          <div class="button-group">\
+            <button type="submit" class="btn btn-primary">Generate Prompt</button>\
+            <button type="button" class="btn btn-outline-danger" onclick="resetForm()">Reset</button>\
+          </div>\
+        </form>\
+      </section>\
+\
+      <!-- OUTPUT DISPLAY PANEL -->\
+      <section class="panel output-panel">\
+        <div class="output-header">\
+          <div class="panel-title" style="margin-bottom:0; padding-bottom:0; border-bottom:none;">AI Kickoff Prompt</div>\
+          <div class="output-actions">\
+            <button type="button" class="btn btn-secondary" onclick="copyPrompt()">Copy Prompt</button>\
+            <button type="button" class="btn btn-secondary" onclick="downloadMarkdown()">Download .md</button>\
+          </div>\
+        </div>\
+\
+        <div id="promptOutput" class="prompt-container">\
+          <div class="placeholder-text">Fill in the project parameters and click "Generate Prompt" to build your custom AI kickoff prompt.</div>\
+        </div>\
+      </section>\
+    </div>\
+  </div>\
+\
+  <div id="toast" class="toast">Prompt copied to clipboard!</div>\
+\
+  <script>\
+    function generatePrompt() \{\
+      const websiteUrl = document.getElementById('websiteUrl').value.trim();\
+      if (!websiteUrl) \{\
+        alert('Please enter a valid Website URL.');\
+        return;\
+      \}\
+\
+      const brandName = document.getElementById('brandName').value.trim() || 'the subject brand';\
+      const primaryObjective = document.getElementById('primaryObjective').value;\
+      const researchDepth = document.querySelector('input[name="researchDepth"]:checked').value;\
+      const creativeApproach = document.querySelector('input[name="creativeApproach"]:checked').value;\
+\
+      const sources = Array.from(document.querySelectorAll('.sourceMaterial:checked')).map(el => el.value);\
+      const sourcesText = sources.length > 0 ? sources.join(', ') : 'Publicly accessible website content';\
+\
+      const deliverables = Array.from(document.querySelectorAll('.deliverable:checked')).map(el => el.value);\
+      const competitors = document.getElementById('competitors').value.trim() || 'N/A';\
+      const elementsToPreserve = document.getElementById('elementsToPreserve').value.trim() || 'Preserve core brand identity, logo assets, and established URLs unless changes are explicitly authorized.';\
+      const additionalContext = document.getElementById('additionalContext').value.trim() || 'Focus on user experience, clear typography, and conversion-focused design.';\
+\
+      const deliverablesFormatted = deliverables.map(d => `  - $\{d\}`).join('\\n');\
+\
+      const promptText = `# Universal Master AI Prompt \'97 Website Audit to Strategic Design Brief\
+\
+## **Role Assignment**\
+Act as a senior multidisciplinary creative, brand strategy, and web development team comprising:\
+  - Brand Strategist & Creative Director\
+  - Visual Identity & Editorial Art Director\
+  - Senior UX/UI & Interaction Designer\
+  - Information Architect\
+  - Content & Technical SEO Strategist\
+  - Conversion Rate Optimization Specialist\
+  - Accessibility (WCAG 2.2 AA) & Performance Specialist\
+  - Technical Solutions Architect\
+\
+Your assignment is to inspect, analyze, and reverse-engineer the supplied website into an evidence-based brand and digital experience design brief.\
+\
+---\
+\
+## **Project Parameters**\
+- **Target Website URL:** $\{websiteUrl\}\
+- **Brand Name:** $\{brandName\}\
+- **Primary Objective:** $\{primaryObjective\}\
+- **Research & Audit Depth:** $\{researchDepth\}\
+- **Creative Evolution Approach:** $\{creativeApproach\}\
+- **Available Source Materials:** $\{sourcesText\}\
+- **Design Inspiration / Benchmarks:** $\{competitors\}\
+\
+---\
+\
+## **Non-Negotiable Preservation Requirements**\
+$\{elementsToPreserve\}\
+\
+---\
+\
+## **Business Context & Constraints**\
+$\{additionalContext\}\
+\
+---\
+\
+## **Execution Instructions & Analysis Phases**\
+\
+### **Phase 1 \'97 Discovery & Evidence Collection**\
+1. Crawl and inspect the main navigation, homepage, key detail pages, utility footers, forms, and responsive mobile layouts for **$\{websiteUrl\}**.\
+2. Record concrete visual and functional evidence for each finding.\
+3. Classify all observations as **VERIFIED** (directly observed), **INFERRED** (interpretation requiring confirmation), or **UNKNOWN**.\
+\
+### **Phase 2 \'97 Reverse-Engineer Brand & Visual Identity**\
+1. **Brand Identity:** Determine brand purpose, core offering, audience hypothesis, tone of voice, and messaging hierarchy.\
+2. **Visual Tokens:** Extract exact or estimated color palettes (primary, background, text, accent, hover), typography scale/font families, spacing rhythms, corner radii, and photography style.\
+\
+### **Phase 3 \'97 Experience, UX & Content Audit**\
+1. Reconstruct information architecture and sitemap hierarchy.\
+2. Perform page-by-page analysis (Purpose, User Task, Visual Hierarchy, CTA clarity, Responsive behavior).\
+3. Evaluate accessibility (WCAG 2.2 AA contrast, keyboard focus, alt text) and performance indicators.\
+\
+### **Phase 4 \'97 Creative Concepts & Evolution**\
+Compare 3 creative concepts before finalizing recommendations:\
+  - **Concept A (Refine & Preserve):** Focus on consistency, usability, and typography polish.\
+  - **Concept B (Evolve & Elevate):** Modernize design system, storytelling, and interactive patterns.\
+  - **Concept C (Strategic Transformation):** Ambitious creative direction grounded in user intent.\
+\
+---\
+\
+## **Selected Deliverables to Produce**\
+Generate the following formal design brief sections based on the audit:\
+\
+$\{deliverablesFormatted\}\
+\
+---\
+\
+## **Output Requirements**\
+- Provide evidence-backed findings without inventing unverified performance data.\
+- Structure output with clear markdown headings, comparison tables, and design token specifications.\
+- Deliver an actionable implementation roadmap with prioritized task backlogs (P0 Critical, P1 Important, P2 Enhancement).`;\
+\
+      document.getElementById('promptOutput').textContent = promptText;\
+      showToast('Prompt generated successfully!');\
+    \}\
+\
+    function copyPrompt() \{\
+      const promptText = document.getElementById('promptOutput').textContent;\
+      if (!promptText || promptText.includes('Fill in the project parameters')) \{\
+        alert('Please generate a prompt first.');\
+        return;\
+      \}\
+      navigator.clipboard.writeText(promptText).then(() => \{\
+        showToast('Prompt copied to clipboard!');\
+      \});\
+    \}\
+\
+    function downloadMarkdown() \{\
+      const promptText = document.getElementById('promptOutput').textContent;\
+      if (!promptText || promptText.includes('Fill in the project parameters')) \{\
+        alert('Please generate a prompt first.');\
+        return;\
+      \}\
+      const blob = new Blob([promptText], \{ type: 'text/markdown' \});\
+      const url = URL.createObjectURL(blob);\
+      const a = document.createElement('a');\
+      a.href = url;\
+      a.download = 'website-design-brief-kickoff-prompt.md';\
+      document.body.appendChild(a);\
+      a.click();\
+      document.body.removeChild(a);\
+      URL.revokeObjectURL(url);\
+    \}\
+\
+    function resetForm() \{\
+      document.getElementById('generatorForm').reset();\
+      document.getElementById('promptOutput').innerHTML = '<div class="placeholder-text">Fill in the project parameters and click "Generate Prompt" to build your custom AI kickoff prompt.</div>';\
+      showToast('Form reset.');\
+    \}\
+\
+    function showToast(message) \{\
+      const toast = document.getElementById('toast');\
+      toast.textContent = message;\
+      toast.classList.add('show');\
+      setTimeout(() => \{\
+        toast.classList.remove('show');\
+      \}, 2500);\
+    \}\
+  </script>\
+</body>\
+</html>\
+}
