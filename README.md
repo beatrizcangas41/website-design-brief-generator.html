@@ -48,16 +48,6 @@ It helps define:
 
 The output is designed to be copied into AI assistants and used as a structured creative brief for website audits and strategic design work.
 
-## Studio Benefits
-
-- intelligent prompt generation
-- guided project setup
-- support for uploaded brand references and documents
-- copy-to-clipboard output
-- markdown export for saving and sharing
-- no backend or framework required
-- simple, elegant, fast experience
-
 ## Why it matters
 
 Most website reviews start with fragmented notes, inconsistent context, and manual synthesis. This tool provides a cleaner starting point — turning raw inputs into a cohesive creative brief that is easier to discuss, iterate on, and execute.
@@ -78,6 +68,13 @@ Copy the final brief directly or export it as a Markdown file for sharing or doc
 
 ### ⚡ Lightweight execution
 The whole app runs in the browser without a build step or server-side setup.
+
+## Tech Stack
+
+- HTML
+- CSS
+- JavaScript
+- GitHub Pages deployment
 
 ## File Structure
 
