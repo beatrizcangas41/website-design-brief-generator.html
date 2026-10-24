@@ -352,7 +352,22 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
 .app-grid{gap:1.5rem}@media(min-width:1024px){.app-grid{grid-template-columns:minmax(390px,540px) minmax(0,1fr)}}
 .panel{padding:clamp(1rem,2vw,1.75rem)}.output-panel{position:sticky;top:1rem;max-height:calc(100vh - 2rem);min-height:500px}
 .prompt-container{min-height:350px}.step{display:none}.step.active{display:block}.step-heading{font-size:1.2rem;margin-bottom:.35rem}.step-intro{color:var(--text-muted);font-size:.9rem;margin-bottom:1.5rem}
-.step-nav{display:flex;gap:.5rem;flex-wrap:wrap;margin:0 0 1.5rem}.step-chip{border:1px solid var(--border-color);border-radius:999px;padding:.45rem .7rem;background:white;color:var(--text-muted);font:600 .78rem var(--font-sans);cursor:pointer}.step-chip.active{background:#18181b;color:white;border-color:#18181b}.step-chip:focus-visible,.btn:focus-visible{outline:3px solid #9a9aa5;outline-offset:2px}
+/* Step path */
+.step-nav{display:flex;margin:.25rem 0 1.75rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border-color)}
+.step-chip{flex:1;min-width:0;position:relative;display:flex;flex-direction:column;align-items:center;gap:.5rem;background:none;border:0;padding:0 .25rem;cursor:pointer;color:var(--text-muted);font:600 .75rem/1.25 var(--font-sans);text-align:center;border-radius:8px}
+.step-chip::before{content:'';position:absolute;top:15px;left:calc(-50% + 20px);right:calc(50% + 20px);height:2px;background:var(--border-color);border-radius:2px;transition:background-color .25s ease}
+.step-chip:first-child::before{display:none}
+.step-chip.done::before,.step-chip.active::before{background:#18181b}
+.step-dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--border-color);background:#fff;display:grid;place-items:center;font:600 .8rem var(--font-sans);color:var(--text-muted);position:relative;z-index:1;transition:all .2s ease}
+.step-label{max-width:100%;transition:color .2s ease}
+.step-chip:hover:not(.locked) .step-dot{border-color:#18181b;color:#18181b}
+.step-chip.done .step-dot{border-color:#18181b;color:#18181b}
+.step-chip.active .step-dot{background:#18181b;border-color:#18181b;color:#fff;box-shadow:0 0 0 5px rgba(24,24,27,.09)}
+.step-chip.active .step-label,.step-chip.done .step-label{color:#18181b}
+.step-chip:focus-visible{outline:none}.step-chip:focus-visible .step-dot{outline:3px solid #9a9aa5;outline-offset:2px}
+.btn:focus-visible{outline:3px solid #9a9aa5;outline-offset:2px}
+.progress-track{display:none!important}
+.step-meta{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .step-footer{display:flex;gap:.65rem;justify-content:space-between;border-top:1px solid var(--border-color);padding-top:1.25rem;margin-top:1.5rem}.step-footer .btn-primary{margin-left:auto}
 .form-group{margin-bottom:1.5rem}label{font-size:.9rem}.label-hint{line-height:1.5}.checkbox-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.checkbox-label,.radio-label{padding:.75rem;min-height:46px;font-size:.85rem}.radio-label:has(input:checked),.checkbox-label:has(input:checked){border-color:#777782;background:#f7f7fa}
 .output-actions{flex-wrap:wrap}.output-header{align-items:flex-start}.progress-track{height:5px;background:#ededf1;border-radius:20px;overflow:hidden;margin-bottom:1.3rem}.progress-fill{height:100%;background:#18181b;transition:width .2s}.step-meta{color:var(--text-muted);font-size:.8rem;margin-bottom:.5rem}
@@ -378,7 +393,8 @@ body{padding:clamp(1rem,3vw,3rem) 1rem;background:#f7f7f9}
 .file-remove:hover{background:#fef2f2}
 .file-item input[type="text"]{padding:.45rem .6rem;font-size:.8rem}
 .attach-options{margin-top:.6rem}
-.step-chip.locked{opacity:.45;cursor:not-allowed}
+.step-chip.locked{cursor:not-allowed}.step-chip.locked .step-dot,.step-chip.locked .step-label{opacity:.45}
+.step-chip.locked .step-dot{border-style:dashed}
 </style>
 </head>
 <body>
@@ -805,7 +821,7 @@ ${deliverablesFormatted}
  function syncLock(){const ok=urlReady();[...nav.children].forEach((chip,n)=>{if(n>0){chip.classList.toggle('locked',!ok);chip.setAttribute('aria-disabled',String(!ok));chip.title=ok?'':'Enter a valid Website URL first'}})}
  urlInput.addEventListener('input',syncLock);
  definitions.forEach((def,i)=>{
-  const chip=document.createElement('button');chip.type='button';chip.className='step-chip';chip.textContent=(i+1)+'. '+def.title;chip.addEventListener('click',()=>{if(i>0&&!urlReady()){blockToStep1();return}show(i)});nav.append(chip);
+  const chip=document.createElement('button');chip.type='button';chip.className='step-chip';chip.innerHTML='<span class="step-dot" aria-hidden="true">'+(i+1)+'</span><span class="step-label">'+def.title+'</span>';chip.setAttribute('aria-label','Step '+(i+1)+': '+def.title);chip.addEventListener('click',()=>{if(i>0&&!urlReady()){blockToStep1();return}show(i)});nav.append(chip);
   const section=document.createElement('section');section.className='step';section.setAttribute('aria-label',def.title);
   section.innerHTML='<h2 class="step-heading">'+def.title+'</h2><p class="step-intro">'+def.desc+'</p>';
   def.indexes.forEach(index=>section.append(groups[index]));
@@ -819,7 +835,7 @@ ${deliverablesFormatted}
  });
  const originalActions=form.querySelector('.button-group');originalActions.style.marginTop='1rem';originalActions.querySelector('[type="submit"]').style.display='none';
  form.insertBefore(track,form.firstChild);form.insertBefore(meta,track);form.insertBefore(nav,meta);steps.forEach(step=>form.insertBefore(step,originalActions));
- function show(i){current=i;steps.forEach((step,n)=>{step.classList.toggle('active',n===i);step.hidden=n!==i});[...nav.children].forEach((chip,n)=>{chip.classList.toggle('active',n===i);chip.setAttribute('aria-current',n===i?'step':'false')});meta.textContent='Step '+(i+1)+' of '+steps.length;track.firstElementChild.style.width=((i+1)/steps.length*100)+'%'}
+ function show(i){current=i;steps.forEach((step,n)=>{step.classList.toggle('active',n===i);step.hidden=n!==i});[...nav.children].forEach((chip,n)=>{chip.classList.toggle('active',n===i);chip.classList.toggle('done',n<i);chip.querySelector('.step-dot').textContent=n<i?'✓':String(n+1);chip.setAttribute('aria-current',n===i?'step':'false')});meta.textContent='Step '+(i+1)+' of '+steps.length;track.firstElementChild.style.width=((i+1)/steps.length*100)+'%'}
  const oldReset=window.resetForm;window.resetForm=function(){oldReset();show(0);syncLock()};
  form.addEventListener('submit',e=>{if(!urlReady()){e.preventDefault();e.stopImmediatePropagation();blockToStep1()}},true);
  show(0);syncLock();
